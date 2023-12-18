@@ -8,3 +8,5 @@ class Signer:
 
     def generate_phrase(self, password):
         return aleph.generate_phrase(password)
+    
+    

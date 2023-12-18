@@ -1,5 +1,4 @@
 use std::str::FromStr;
-use std::result::Result;
 use aleph_client::contract::ConvertibleValue;
 use aleph_client::contract_transcode::Value;
 use pyo3::prelude::*;
@@ -7,7 +6,7 @@ use aleph_client::{RawKeyPair, Pair, KeyPair, Connection, SignedConnection, AsSi
 use aleph_client::pallets::balances::BalanceUserApi;
 // use aleph_client::api;
 // use aleph_client::api::runtime_types::sp_runtime::multiaddress::MultiAddress;
-
+use aleph_client::pallets::system::SystemApi;
 
 
 #[pyfunction]
@@ -26,13 +25,26 @@ fn get_account_details(phrase:&str) -> PyResult<(String,String)>{
 
 }
 
-#[pyfunction]
-fn get_account_id(receiver:String)->PyResult<String>{
-    let dest: AccountId = ConvertibleValue(Value::Literal(receiver)).try_into().expect("Was unable to get Account Id");
-    Ok(dest.to_string())
 
+async fn get_user_balance(receiver:String, address: &str)->Result<String,()>{
+    let account: AccountId = ConvertibleValue(Value::Literal(receiver)).try_into().expect("Was unable to get Account Id");
+    let rpc: Connection = Connection::new(address).await;
+    let balance = rpc.get_free_balance(account, None).await;
+    Ok(balance.to_string())
 }
-                               
+
+
+#[pyfunction]
+pub fn get_account_balance(py: Python, receiver:String, address: String) -> PyResult<&PyAny> {
+    pyo3_asyncio::async_std::future_into_py(py, async move {
+        let balance = get_user_balance(receiver, address.as_str())
+        .await
+        .expect("something went wrong with getting user balance");
+    Ok(balance)
+    })
+}
+
+
 pub async fn get_signer(address: &str, phrase:&str ) -> Result<SignedConnection,()> {
     let rpc: Connection = Connection::new(address).await;
     let signer = KeyPair::from_str(phrase).expect("signer could not be initialized");
@@ -41,7 +53,7 @@ pub async fn get_signer(address: &str, phrase:&str ) -> Result<SignedConnection,
 }
 
 pub async  fn send_transaction(signer:SignedConnection,receiver:String, amount:u128) -> Result<String,()>{
-    let status = aleph_client::TxStatus::Finalized;
+    let status = aleph_client::TxStatus::Submitted;
     let dest: AccountId = ConvertibleValue(Value::Literal(receiver)).try_into().expect("Was unable to get Account Id");
     let tx = signer.as_signed().transfer(dest, amount, status).await;
     let tx_hash = tx.unwrap().tx_hash.to_string();
@@ -57,7 +69,7 @@ pub async  fn send_transaction(signer:SignedConnection,receiver:String, amount:u
 fn aleph_api(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(generate_phrase, m)?)?;
     m.add_function(wrap_pyfunction!(get_account_details, m)?)?; 
-    m.add_function(wrap_pyfunction!(get_account_id, m)?)?;   
+    m.add_function(wrap_pyfunction!(get_account_balance, m)?)?;   
   
 
     Ok(())
