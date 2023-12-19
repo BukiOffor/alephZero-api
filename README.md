@@ -26,7 +26,7 @@ maturin develop
 ```
 
 ## Usage
-
+You can create a new python file in the base folder or you can edit the `main.py` in the base folder to run your code.
 `api/lib.py` contains a python module that interacts with the aleph zero blockchain. To use the module, you can import the `Chain` class from api/lib.py. 
 
 ```python
