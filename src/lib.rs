@@ -53,7 +53,7 @@ pub async fn get_signer(address: &str, phrase:&str ) -> Result<SignedConnection,
     Ok(wallet)                                                                                                                    
 }
 
-pub async  fn send_transaction(signer:SignedConnection, receiver:String, amount:u128) -> Result<String,()>{
+pub async fn send_transaction(signer:SignedConnection, receiver:String, amount:u128) -> Result<String,()>{
     let status = aleph_client::TxStatus::Submitted;
     let dest: AccountId = ConvertibleValue(Value::Literal(receiver)).try_into().expect("Was unable to get Account Id");
     let tx = signer.as_signed().transfer(dest, amount, status).await;

@@ -2,7 +2,7 @@ import aleph_api as aleph
 import asyncio 
 
 
-class Signer:
+class Chain:
     
     def __init__(self) -> None:
         pass
@@ -18,7 +18,11 @@ class Signer:
         balance = await aleph.get_account_balance(address,provider)
         return (balance)
 
-    
+    def get_wallet_address(self,phrase):
+        addr = aleph.get_account_details(phrase)
+        return addr[0]
+
+
     def send_transaction():
         pass
 
