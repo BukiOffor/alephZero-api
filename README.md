@@ -58,3 +58,9 @@ balance = chain.get_balance(addr,provider)
 print(balance)
 >>> 0
 ```
+## OTHER APIS IMPLEMENTED 
+
+- `get_block_hash()`
+- `get_block_number()`
+- `sign_and_transfer_azero()`
+- 
