@@ -5,6 +5,7 @@ import asyncio
 class Chain:
     
     def __init__(self) -> None:
+        self.provider = "wss://aleph-zero-rpc.dwellir.com:443"
         pass
 
     def generate_phrase(self, password):
@@ -32,4 +33,18 @@ class Chain:
         hash = await aleph.sign_and_transfer_azero(provider,phrase,receiver,amount)
         return hash
 
+    async def _getBlockHash(self,index, provider):
+        block_hash = await aleph.get_block_hash(provider,index)
+        return str(block_hash)
     
+    def get_block_hash(self,index,provider="wss://aleph-zero-rpc.dwellir.com:443"):
+        block_hash = asyncio.run(self._getBlockHash(int(index),provider))
+        return block_hash
+    
+    async def _getBlockNumber(self,hash, provider):
+        block_num = await aleph.get_block_number(provider,hash)
+        return str(block_num)
+    
+    def get_block_number(self,hash,provider="wss://aleph-zero-rpc.dwellir.com:443"):
+        block_number = asyncio.run(self._getBlockNumber(hash,provider))
+        return block_number

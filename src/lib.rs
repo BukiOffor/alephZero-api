@@ -1,13 +1,14 @@
 use std::str::FromStr;
 use aleph_client::contract::ConvertibleValue;
 use aleph_client::contract_transcode::Value;
+use aleph_client::sp_core::H256;
 use pyo3::prelude::*;
-use aleph_client::{RawKeyPair, Pair, KeyPair, Connection, SignedConnection, AsSigned, AccountId, SubxtClient,};
+use aleph_client::{RawKeyPair, Pair, KeyPair, Connection, SignedConnection, AsSigned, AccountId};
 use aleph_client::pallets::balances::BalanceUserApi;
 //use aleph_client::AsConnection;
-// use aleph_client::api;
-// use aleph_client::api::runtime_types::sp_runtime::multiaddress::MultiAddress;
+use aleph_client::utility::BlocksApi;
 use aleph_client::pallets::system::SystemApi;
+use std::process;
 
 // generate a seed phrase for a user
 #[pyfunction]
@@ -34,6 +35,33 @@ async fn get_user_balance(wallet_address:String, rpc_url: &str)->Result<String,(
     Ok(balance.to_string())
 }
 
+// gets the block has, given a block number
+#[pyfunction]
+pub fn get_block_hash(py: Python, rpc_url: String, block:u32) -> PyResult<&PyAny> {    
+    pyo3_asyncio::async_std::future_into_py(py, async move {
+        let rpc: Connection = Connection::new(&rpc_url).await;
+        let block_hash = rpc.get_block_hash(block)
+        .await
+        .expect("Block hash could not be unwrapped")
+        .unwrap();
+    Ok(block_hash.to_string())
+    })
+}
+#[pyfunction]
+pub fn get_block_number(py: Python, rpc_url: String, value:String) -> PyResult<&PyAny> { 
+    let block = H256::from_str(&value).expect("expected hash got unknown") ;  
+    pyo3_asyncio::async_std::future_into_py(py, async move {
+        let rpc: Connection = Connection::new(&rpc_url).await;
+        let block_num = rpc.get_block_number(block)
+        .await
+        .expect("Block hash could not be unwrapped");
+    if let Some(num) = block_num {
+        Ok(num)
+    } else {
+        process::exit(0);
+    }
+    })
+}
 
 // get the user balance of a user
 #[pyfunction]
@@ -60,9 +88,6 @@ pub async fn transfer_azero(signer:SignedConnection, receiver:String, amount:u12
     let dest: AccountId = ConvertibleValue(Value::Literal(receiver)).try_into().expect("Was unable to get Account Id");
     let tx = signer.as_signed().transfer(dest, amount, status).await;
     let tx_hash = tx.unwrap().tx_hash.to_string();
-    // let tx = api::tx()
-    // .balances()
-    // .transfer(MultiAddress::Id(dest), amount);
     Ok(tx_hash)
 }
 
@@ -87,6 +112,10 @@ fn aleph_api(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_account_details, m)?)?; 
     m.add_function(wrap_pyfunction!(get_account_balance, m)?)?; 
     m.add_function(wrap_pyfunction!(sign_and_transfer_azero, m)?)?;   
+    m.add_function(wrap_pyfunction!(get_block_hash, m)?)?;  
+    m.add_function(wrap_pyfunction!(get_block_number, m)?)?;   
+ 
+
   
     Ok(())
 }
