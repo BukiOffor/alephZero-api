@@ -56,5 +56,5 @@ addr = "5G6LVo8aJmFiXTdTioDDt49ZseJ5eh9UQRga2MYf1hzdyhUJ"
 provider = "wss://aleph-zero-rpc.dwellir.com:443"
 balance = chain.get_balance(addr,provider)
 print(balance)
->>>0
+>>> 0
 ```
