@@ -23,7 +23,13 @@ class Chain:
         return addr[0]
 
 
-    def send_transaction():
-        pass
+    def send_azero(self,phrase,receiver,amount,provider="wss://aleph-zero-rpc.dwellir.com:443"):
+        tx_hash = asyncio.run(self._send_azero(phrase,receiver,amount,provider))
+        return tx_hash
+
+
+    async def _send_azero(self,phrase,receiver,amount,provider):
+        hash = await aleph.sign_and_transfer_azero(provider,phrase,receiver,amount)
+        return hash
 
     

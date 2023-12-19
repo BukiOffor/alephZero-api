@@ -9,13 +9,14 @@ use aleph_client::pallets::balances::BalanceUserApi;
 // use aleph_client::api::runtime_types::sp_runtime::multiaddress::MultiAddress;
 use aleph_client::pallets::system::SystemApi;
 
-
+// generate a seed phrase for a user
 #[pyfunction]
 fn generate_phrase(password:&str) -> PyResult<String> {
     let key = RawKeyPair::generate_with_phrase(Some(password));
     Ok(key.1)
 }
 
+// generate a wallet address and account id for user
 #[pyfunction]
 fn get_account_details(phrase:&str) -> PyResult<(String,String)>{
     let signer = KeyPair::from_str(phrase).expect("signer could not be initialized");
@@ -24,35 +25,37 @@ fn get_account_details(phrase:&str) -> PyResult<(String,String)>{
     Ok((account_id, kpub))
 }
 
-
-async fn get_user_balance(receiver:String, address: &str)->Result<String,()>{
-    let account: AccountId = ConvertibleValue(Value::Literal(receiver)).try_into().expect("Was unable to get Account Id");
-    let rpc: Connection = Connection::new(address).await;
+// asynchronous function to get the user balance
+async fn get_user_balance(wallet_address:String, rpc_url: &str)->Result<String,()>{
+    let account: AccountId = ConvertibleValue(Value::Literal(wallet_address)).try_into().expect("Was unable to get Account Id");
+    let rpc: Connection = Connection::new(rpc_url).await;
     //let rpc = rpc.as_client().tx().sign_and_submit_default(call, signer);
     let balance = rpc.get_free_balance(account, None).await;
     Ok(balance.to_string())
 }
 
 
-
+// get the user balance of a user
 #[pyfunction]
-pub fn get_account_balance(py: Python, receiver:String, address: String) -> PyResult<&PyAny> {
+pub fn get_account_balance(py: Python, wallet_address:String, rpc_url: String) -> PyResult<&PyAny> {
     pyo3_asyncio::async_std::future_into_py(py, async move {
-        let balance = get_user_balance(receiver, address.as_str())
+        let balance = get_user_balance(wallet_address, rpc_url.as_str())
         .await
         .expect("something went wrong with getting user balance");
     Ok(balance)
     })
 }
 
-pub async fn get_signer(address: &str, phrase:&str ) -> Result<SignedConnection,()> {
-    let rpc: Connection = Connection::new(address).await;
+// conects a wallet the the blockchain
+pub async fn get_signer(rpc_url: &str, phrase:&str ) -> Result<SignedConnection,()> {
+    let rpc: Connection = Connection::new(rpc_url).await;
     let signer = KeyPair::from_str(phrase).expect("signer could not be initialized");
     let wallet = SignedConnection::from_connection(rpc, signer);
     Ok(wallet)                                                                                                                    
 }
 
-pub async fn send_transaction(signer:SignedConnection, receiver:String, amount:u128) -> Result<String,()>{
+// transfers funds to a wallet
+pub async fn transfer_azero(signer:SignedConnection, receiver:String, amount:u128) -> Result<String,()>{
     let status = aleph_client::TxStatus::Submitted;
     let dest: AccountId = ConvertibleValue(Value::Literal(receiver)).try_into().expect("Was unable to get Account Id");
     let tx = signer.as_signed().transfer(dest, amount, status).await;
@@ -63,11 +66,27 @@ pub async fn send_transaction(signer:SignedConnection, receiver:String, amount:u
     Ok(tx_hash)
 }
 
+#[pyfunction]
+pub fn sign_and_transfer_azero(py: Python, rpc_url: String, phrase:String, receiver:String, amount:u128) -> PyResult<&PyAny> {    
+    pyo3_asyncio::async_std::future_into_py(py, async move {
+        let signer = get_signer(&rpc_url,&phrase)
+            .await
+            .expect("Signer could not be initialized");
+        let tx_hash = transfer_azero(signer, receiver, amount)
+            .await
+            .expect("transaction could not be sent");
+        Ok(tx_hash)
+    })
+}
+
+
 /// A Python module implemented in Rust.
 #[pymodule]
 fn aleph_api(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(generate_phrase, m)?)?;
     m.add_function(wrap_pyfunction!(get_account_details, m)?)?; 
-    m.add_function(wrap_pyfunction!(get_account_balance, m)?)?;   
+    m.add_function(wrap_pyfunction!(get_account_balance, m)?)?; 
+    m.add_function(wrap_pyfunction!(sign_and_transfer_azero, m)?)?;   
+  
     Ok(())
 }
