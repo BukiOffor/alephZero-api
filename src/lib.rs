@@ -13,7 +13,6 @@ use aleph_client::pallets::system::SystemApi;
 #[pyfunction]
 fn generate_phrase(password:&str) -> PyResult<String> {
     let key = RawKeyPair::generate_with_phrase(Some(password));
-    //let address = key.0.public().to_string(); 
     Ok(key.1)
 }
 

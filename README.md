@@ -36,7 +36,7 @@ You can generate a seed phrase programmatically by running. The ```generate_phra
 
 ```python
 chain = Chain()
-password = "horse-staple-zenith "
+password = "horse-staple-zenith"
 phrase = chain.generate_phrase(password)
 print(phrase)
 >>> unable brief apple enhance wool host join service sample kiss blossom iron
