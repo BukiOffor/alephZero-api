@@ -1,6 +1,4 @@
 from api.lib import Chain
-# import aleph_api as api
-# import asyncio
 
 chain = Chain()
 seed = "elevator notable sword phrase doctor tell nice arrow melody judge bleak worth"
