@@ -48,3 +48,7 @@ class Chain:
     def get_block_number(self,hash,provider="wss://aleph-zero-rpc.dwellir.com:443"):
         block_number = asyncio.run(self._getBlockNumber(hash,provider))
         return block_number
+    
+    def sign(self, phrase, message):
+        tuple = aleph.sign(phrase,bytes(message, "utf-8"))
+        return tuple 

@@ -8,7 +8,9 @@ use aleph_client::pallets::balances::BalanceUserApi;
 //use aleph_client::AsConnection;
 use aleph_client::utility::BlocksApi;
 use aleph_client::pallets::system::SystemApi;
+use pyo3::types::PyTuple;
 use std::process;
+
 
 // generate a seed phrase for a user
 #[pyfunction]
@@ -16,6 +18,17 @@ fn generate_phrase(password:&str) -> PyResult<String> {
     let key = RawKeyPair::generate_with_phrase(Some(password));
     Ok(key.1)
 }
+
+// sign a statement
+#[pyfunction]
+fn sign<'a>(py:Python<'a> ,phrase:String, message:&[u8]) -> PyResult<&'a PyTuple> {
+    let tuple: &'a PyTuple;
+    let signer = KeyPair::from_str(&phrase).expect("signer could not be initialized");
+    let sig = signer.signer().sign(message).0;
+    tuple = PyTuple::new(py, sig);
+    Ok(tuple)
+}
+
 
 // generate a wallet address and account id for user
 #[pyfunction]
@@ -113,7 +126,9 @@ fn aleph_api(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_account_balance, m)?)?; 
     m.add_function(wrap_pyfunction!(sign_and_transfer_azero, m)?)?;   
     m.add_function(wrap_pyfunction!(get_block_hash, m)?)?;  
-    m.add_function(wrap_pyfunction!(get_block_number, m)?)?;   
+    m.add_function(wrap_pyfunction!(get_block_number, m)?)?;
+    m.add_function(wrap_pyfunction!(sign, m)?)?;   
+   
  
 
   

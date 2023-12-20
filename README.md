@@ -58,6 +58,14 @@ balance = chain.get_balance(addr,provider)
 print(balance)
 >>> 0
 ```
+To sign a statement with your secret key, we can use the sign method exposed by the api that takes a statement and seed, then returns a signature in bytes.
+```python
+statement = "A legal binding contract ......"
+signature = chain.sign(phrase, statement)
+print(signature)
+>>> (0,210,166,165,128,235 ......)
+```
+
 ## OTHER APIS IMPLEMENTED 
 
 - `get_block_hash()`
