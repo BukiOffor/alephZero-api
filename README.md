@@ -70,6 +70,7 @@ print(signature)
 ```
 Also a signed statement can be verified to be `True` or `False` using the `verify_sig()` method
 ```python
+kpub = chain.get_public_key(phrase)
 verified = chain.verify_sig(signature,statement,kpub)
 print(verified)
 >>> True
@@ -87,3 +88,4 @@ print(verified)
 
 
 >NOTE: All methods were tested and used on the azero mainnet except the transfer_azero(). The API could not be tested on the testnet because the node endpoints were not responding and i could not run my own node.
+
