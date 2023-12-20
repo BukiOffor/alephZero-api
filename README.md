@@ -65,10 +65,15 @@ signature = chain.sign(phrase, statement)
 print(signature)
 >>> (0,210,166,165,128,235 ......)
 ```
+Also a signed statement can be verified to be `True` or `False` using the `verify_sig()` method
+```python
+verified = chain.verify_sig(signature,statement,kpub)
+print(verified)
+>>> True
+```
+## OTHER METHOD'S IMPLEMENTED 
 
-## OTHER APIS IMPLEMENTED 
-
-- `get_block_hash()`
-- `get_block_number()`
-- `sign_and_transfer_azero()`
-- 
+- `get_block_hash()` : gets block has when given a block number 
+- `get_block_number()` : get block number when given a hash
+- `sign_and_transfer_azero()` : transfers azero to a given wallet address
+- `get_public_key()` : generates the given public key in bytes, this is useful for verifying signatures.

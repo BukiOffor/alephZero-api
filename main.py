@@ -3,9 +3,10 @@ from api.lib import Chain
 # import asyncio
 
 chain = Chain()
+seed = "elevator notable sword phrase doctor tell nice arrow melody judge bleak worth"
 
-phrase = chain.generate_phrase("password")
-print(phrase)
+#phrase = chain.generate_phrase("password")
+#print(phrase)
 # addr = chain.get_wallet_address(phrase)
 # print(addr)
 # balance = chain.get_balance(addr);
@@ -14,6 +15,14 @@ print(phrase)
 #print(block_hash)
 #block_number = chain.get_block_number("0xa3c2290488a124a82a7fd57d7c54edaebd6b214d2330e6510291b40fc8887c9a")
 #print(block_number)
+
 statement = "A legal binding contract ......"
-signature = chain.sign(phrase, statement)
+signature = chain.sign(seed, statement)
 print(signature)
+
+kpub = chain.get_public_key(seed)
+print(kpub)
+
+
+verified = chain.verify_sig(signature,statement,kpub)
+print(verified)

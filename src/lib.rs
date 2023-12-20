@@ -1,9 +1,10 @@
 use std::str::FromStr;
-use aleph_client::api::runtime_types::sp_core::ed25519::Signature;
-use aleph_client::api::runtime_types::sp_core::ed25519::Public;
+//use aleph_client::api::runtime_types::sp_core::ed25519::Signature;
+// use aleph_client::api::runtime_types::sp_core::ed25519::Public;
 use aleph_client::contract::ConvertibleValue;
 use aleph_client::contract_transcode::Value;
 use aleph_client::sp_core::H256;
+use aleph_client::sp_core::sr25519::{Public, Signature};
 use pyo3::prelude::*;
 use aleph_client::{RawKeyPair, Pair, KeyPair, Connection, SignedConnection, AsSigned, AccountId};
 use aleph_client::pallets::balances::BalanceUserApi;
@@ -20,6 +21,13 @@ fn generate_phrase(password:&str) -> PyResult<String> {
     let key = RawKeyPair::generate_with_phrase(Some(password));
     Ok(key.1)
 }
+#[pyfunction]
+fn generate_public_key<'a>(py:Python<'a>,phrase:&str) -> PyResult<&'a PyTuple> {
+    let signer = KeyPair::from_str(&phrase).expect("signer could not be initialized");
+    let tuple: &'a PyTuple;
+    tuple = PyTuple::new(py, signer.signer().public().0);
+    Ok(tuple)
+}
 
 // sign a statement
 #[pyfunction]
@@ -31,13 +39,12 @@ fn sign<'a>(py:Python<'a> ,phrase:String, message:&[u8]) -> PyResult<&'a PyTuple
     Ok(tuple)
 }
 
-fn verify_signature(sig:[u8; 64],message:&[u8],key:[u8;32],phrase:&str){
-    let signer = KeyPair::from_str(phrase).expect("signer could not be initialized");
+#[pyfunction]
+fn verify_signature(sig:[u8; 64],message:&[u8],key:[u8;32]) -> PyResult<bool>{
     let pubkey: Public = Public(key);
     let sig = Signature(sig);
-    let verified = <RawKeyPair as Pair>::verify(&sig, message, &pubkey);
-
-    
+    let verified = aleph_client::sp_core::sr25519::Pair::verify(&sig,message,&pubkey);
+    Ok(verified)    
 }
 
 
@@ -54,7 +61,6 @@ fn get_account_details(phrase:&str) -> PyResult<(String,String)>{
 async fn get_user_balance(wallet_address:String, rpc_url: &str)->Result<String,()>{
     let account: AccountId = ConvertibleValue(Value::Literal(wallet_address)).try_into().expect("Was unable to get Account Id");
     let rpc: Connection = Connection::new(rpc_url).await;
-    //let rpc = rpc.as_client().tx().sign_and_submit_default(call, signer);
     let balance = rpc.get_free_balance(account, None).await;
     Ok(balance.to_string())
 }
@@ -138,10 +144,8 @@ fn aleph_api(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(sign_and_transfer_azero, m)?)?;   
     m.add_function(wrap_pyfunction!(get_block_hash, m)?)?;  
     m.add_function(wrap_pyfunction!(get_block_number, m)?)?;
-    m.add_function(wrap_pyfunction!(sign, m)?)?;   
-   
- 
-
-  
+    m.add_function(wrap_pyfunction!(sign, m)?)?;
+    m.add_function(wrap_pyfunction!(verify_signature, m)?)?;  
+    m.add_function(wrap_pyfunction!(generate_public_key, m)?)?;        
     Ok(())
 }

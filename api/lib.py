@@ -23,6 +23,9 @@ class Chain:
         addr = aleph.get_account_details(phrase)
         return addr[0]
 
+    def get_public_key(self,phrase):
+        kpub = aleph.generate_public_key(phrase)
+        return kpub
 
     def send_azero(self,phrase,receiver,amount,provider="wss://aleph-zero-rpc.dwellir.com:443"):
         tx_hash = asyncio.run(self._send_azero(phrase,receiver,amount,provider))
@@ -50,5 +53,9 @@ class Chain:
         return block_number
     
     def sign(self, phrase, message):
-        tuple = aleph.sign(phrase,bytes(message, "utf-8"))
-        return tuple 
+        sig = aleph.sign(phrase,bytes(message, "utf-8"))
+        return sig 
+    
+    def verify_sig(self,sig,message,key):
+        verified = aleph.verify_signature(sig,bytes(message, "utf-8"),key)
+        return verified
