@@ -1,4 +1,6 @@
 use std::str::FromStr;
+use aleph_client::api::runtime_types::sp_core::ed25519::Signature;
+use aleph_client::api::runtime_types::sp_core::ed25519::Public;
 use aleph_client::contract::ConvertibleValue;
 use aleph_client::contract_transcode::Value;
 use aleph_client::sp_core::H256;
@@ -27,6 +29,15 @@ fn sign<'a>(py:Python<'a> ,phrase:String, message:&[u8]) -> PyResult<&'a PyTuple
     let sig = signer.signer().sign(message).0;
     tuple = PyTuple::new(py, sig);
     Ok(tuple)
+}
+
+fn verify_signature(sig:[u8; 64],message:&[u8],key:[u8;32],phrase:&str){
+    let signer = KeyPair::from_str(phrase).expect("signer could not be initialized");
+    let pubkey: Public = Public(key);
+    let sig = Signature(sig);
+    let verified = <RawKeyPair as Pair>::verify(&sig, message, &pubkey);
+
+    
 }
 
 
