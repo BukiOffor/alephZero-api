@@ -3,7 +3,7 @@
 
 # ALEPH-API
 
-A Python Api that interacts with the Aleph Zero blockchain
+A Python Api that interacts with the Aleph Zero blockchain. This Api includes transfering of azero, signing of statements, verification of signed statements and many more.
 
 ## CHALLENGE CATEGORY
 ### TOOLING / INFRASTRUCTURE
