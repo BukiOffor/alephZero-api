@@ -1,6 +1,4 @@
 use std::str::FromStr;
-//use aleph_client::api::runtime_types::sp_core::ed25519::Signature;
-// use aleph_client::api::runtime_types::sp_core::ed25519::Public;
 use aleph_client::contract::ConvertibleValue;
 use aleph_client::contract_transcode::Value;
 use aleph_client::sp_core::H256;
@@ -8,7 +6,6 @@ use aleph_client::sp_core::sr25519::{Public, Signature};
 use pyo3::prelude::*;
 use aleph_client::{RawKeyPair, Pair, KeyPair, Connection, SignedConnection, AsSigned, AccountId};
 use aleph_client::pallets::balances::BalanceUserApi;
-//use aleph_client::AsConnection;
 use aleph_client::utility::BlocksApi;
 use aleph_client::pallets::system::SystemApi;
 use pyo3::types::PyTuple;
@@ -73,7 +70,7 @@ pub fn get_block_hash(py: Python, rpc_url: String, block:u32) -> PyResult<&PyAny
         let block_hash = rpc.get_block_hash(block)
         .await
         .expect("Block hash could not be unwrapped")
-        .unwrap();
+        .expect("Block does not exist");
     Ok(block_hash.to_string())
     })
 }
@@ -133,7 +130,6 @@ pub fn sign_and_transfer_azero(py: Python, rpc_url: String, phrase:String, recei
         Ok(tx_hash)
     })
 }
-
 
 /// A Python module implemented in Rust.
 #[pymodule]
