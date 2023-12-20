@@ -5,13 +5,16 @@
 
 A Python Api that interacts with the Aleph Zero blockchain
 
-
+## CHALLENGE CATEGORY
+### TOOLING / INFRASTRUCTURE
+The Python Community boasts the largest number of developers, and Python's emphasis on readability and simplicity positions it as an excellent option for crafting APIs. Its straightforward syntax minimizes development time, fosters team collaboration, and eases maintenance efforts. Additionally, Python serves as an inviting language for newcomers to the tech field. Therefore, introducing a Python library for the Aleph Zero blockchain constitutes a significant addition that can significantly drive adoption within Python's development community.
 ## Installation
 ### Prerequisite
 
 * Rust
-* Maturin
+* Maturin (`pip install maturin`)
 * Python > 3.8
+* virtual environment
 
 Enter the base directory of the project and activate the virtual environment with the following command and install the required python packages.
 
@@ -77,3 +80,10 @@ print(verified)
 - `get_block_number()` : get block number when given a hash
 - `sign_and_transfer_azero()` : transfers azero to a given wallet address
 - `get_public_key()` : generates the given public key in bytes, this is useful for verifying signatures.
+
+
+
+
+
+
+>NOTE: All methods were tested and used on the azero mainnet except the transfer_azero(). The API could not be tested on the testnet because the node endpoints were not responding and i could not run my own node.
