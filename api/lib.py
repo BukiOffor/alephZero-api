@@ -1,7 +1,7 @@
 import aleph_api as aleph
 import asyncio 
 
-
+# todo implement encapsulation
 class Chain:
     
     def __init__(self) -> None:
